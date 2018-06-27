@@ -90,7 +90,7 @@ $_items = $block->getItems();
                         <td class="col-product">
                             <span id="order_item_<?= /* @escapeNotVerified */ $_item->getId() ?>_title"><?= $block->escapeHtml($_item->getName()) ?></span>
                             <div class="product-sku-block">
-                                <span><?= /* @escapeNotVerified */ __('SKU') ?>:</span>
+                                <span><?= /* @escapeNotVerified */ __('Model') ?>:</span>
                                 <?= implode('<br />', $this->helper('Magento\Catalog\Helper\Data')->splitSku($block->escapeHtml($_item->getSku()))) ?>
                             </div>
                             <?php if ($_options = $block->getItemOptions($_item)): ?>

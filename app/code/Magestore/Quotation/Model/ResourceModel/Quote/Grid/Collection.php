@@ -46,6 +46,17 @@ class Collection extends \Magento\Framework\View\Element\UiComponent\DataProvide
             QuoteStatus::STATUS_PENDING,
             QuoteStatus::STATUS_ADMIN_PENDING
         ]);
+        $this->join(
+            ['quote_address' =>  $this->getTable('quote_address')],
+            "quote_id = entity_id AND address_type = 'billing'",
+            [
+                'company'=>'company',
+                'telephone'=>'telephone',
+                'city'=>'city',
+                'postcode'=>'postcode',
+                'street'=>'street'
+            ]
+        );
         return $this;
     }
 }
