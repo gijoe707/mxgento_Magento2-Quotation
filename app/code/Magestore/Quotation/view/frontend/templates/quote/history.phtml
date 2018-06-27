@@ -30,7 +30,7 @@ $_quotes = $block->getQuotes();
             <tbody>
                 <?php foreach ($_quotes as $_quote): ?>
                     <tr>
-                        <td data-th="<?= $block->escapeHtml(__('Quote #')) ?>" class="col id"><?= /* @escapeNotVerified */ $_quote->getEntityId() ?></td>
+                        <td data-th="<?= $block->escapeHtml(__('Quote #')) ?>" class="col id"><?= /* @escapeNotVerified */ $_quote->getRequestIncrementId() ?></td>
                         <td data-th="<?= $block->escapeHtml(__('Created')) ?>" class="col date"><?= /* @escapeNotVerified */ $block->formatDate($_quote->getCreatedAt()) ?></td>
                         <td data-th="<?= $block->escapeHtml(__('Last Updated')) ?>" class="col date"><?= /* @escapeNotVerified */ $block->formatDate($_quote->getUpdatedAt()) ?></td>
                         <?php $extra = $block->getChildBlock('extra.container'); ?>

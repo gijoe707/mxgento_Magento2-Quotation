@@ -43,6 +43,11 @@ class UpgradeData implements UpgradeDataInterface
      */
     protected $productMetadata;
 
+    /**
+     * @var \Magestore\Quotation\Api\QuotationManagementInterface
+     */
+    protected $quotationManagement;
+
 
     /**
      * UpgradeData constructor.
@@ -52,6 +57,7 @@ class UpgradeData implements UpgradeDataInterface
      * @param AttributeSetFactory $attributeSetFactory
      * @param CategorySetupFactory $categorySetupFactory
      * @param \Magento\Framework\App\ProductMetadataInterface $productMetadata
+     * @param \Magestore\Quotation\Api\QuotationManagementInterface $quotationManagement
      */
     public function __construct(
         \Magento\Store\Model\ResourceModel\Website\CollectionFactory $websiteCollectionFactory,
@@ -59,7 +65,8 @@ class UpgradeData implements UpgradeDataInterface
         \Magento\Framework\App\State $appState,
         AttributeSetFactory $attributeSetFactory,
         CategorySetupFactory $categorySetupFactory,
-        \Magento\Framework\App\ProductMetadataInterface $productMetadata
+        \Magento\Framework\App\ProductMetadataInterface $productMetadata,
+        \Magestore\Quotation\Api\QuotationManagementInterface $quotationManagement
     ){
         $this->attributeSetFactory = $attributeSetFactory;
         $this->categorySetupFactory = $categorySetupFactory;
@@ -67,6 +74,7 @@ class UpgradeData implements UpgradeDataInterface
         $this->_product = $product;
         $this->_appState = $appState;
         $this->productMetadata = $productMetadata;
+        $this->quotationManagement = $quotationManagement;
     }
 
     /**
@@ -150,6 +158,10 @@ class UpgradeData implements UpgradeDataInterface
                     return $this;
                 }
             }
+        }
+
+        if(version_compare($context->getVersion(), '1.3.1', '<')) {
+            $this->quotationManagement->reGenerateIncrementId();
         }
         $setup->endSetup();
     }

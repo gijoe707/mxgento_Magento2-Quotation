@@ -21,7 +21,7 @@ class Edit extends \Magestore\Quotation\Controller\Adminhtml\Quote\QuoteAbstract
         $this->_initSession();
         $quote = $this->_getQuote();
         $resultPage = $this->createPageResult();
-        $resultPage->getConfig()->getTitle()->prepend(($quote->getId())?__('Quote #%1', $quote->getId()):__('New Quote'));
+        $resultPage->getConfig()->getTitle()->prepend(($quote->getRequestIncrementId())?__('Quote #%1', $quote->getRequestIncrementId()):__('New Quote'));
         return $resultPage;
     }
 

@@ -44,11 +44,13 @@ $quoteUpdatedStoreDate = $block->formatDate(
     </div>
     <div class="admin__page-section-content">
         <div class="admin__page-section-item quote-information">
+            <?php if($quote->getRequestIncrementId()):?>
             <div class="admin__page-section-item-title">
                 <span class="title">
-                    <?= $block->escapeHtml(__('Quote # %1', $quote->getId())) ?>
+                    <?= $block->escapeHtml(__('Quote # %1', $quote->getRequestIncrementId())) ?>
                 </span>
             </div>
+            <?php endif;?>
             <div class="admin__page-section-item-content">
                 <table class="admin__table-secondary quote-information-table">
                 <tr>

@@ -25,4 +25,7 @@
     <event name="sales_quote_item_set_product">
         <observer name="magestore_quotation_sales_quote_item_set_product" instance="Magestore\Quotation\Observer\SalesQuoteItemSetProduct" />
     </event>
+    <event name="sales_quote_save_before">
+        <observer name="magestore_quotation_sales_quote_save_before" instance="Magestore\Quotation\Observer\SalesQuoteSaveBefore" />
+    </event>
 </config>

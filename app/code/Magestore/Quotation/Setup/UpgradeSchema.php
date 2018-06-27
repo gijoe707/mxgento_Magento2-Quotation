@@ -271,6 +271,19 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 )
             );
         }
+
+        if (version_compare($context->getVersion(), '1.3.1', '<')) {
+            $setup->getConnection()->addColumn(
+                $setup->getTable('quote'),
+                'request_increment_id',
+                array(
+                    'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
+                    'nullable' => true,
+                    'length' => '255',
+                    'comment' => 'Request Increment Id'
+                )
+            );
+        }
         $setup->endSetup();
     }
 }

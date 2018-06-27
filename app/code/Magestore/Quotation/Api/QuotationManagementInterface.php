@@ -211,4 +211,20 @@ interface QuotationManagementInterface
      * @return \Magento\Quote\Api\Data\CartInterface
      */
     public function setRecipientEmails(\Magento\Quote\Api\Data\CartInterface $quote, $recipientEmails = 0);
+
+    /**
+     * @param \Magento\Quote\Api\Data\CartInterface $quote
+     * @return \Magento\Quote\Api\Data\CartInterface
+     */
+    public function setupIncrementId(\Magento\Quote\Api\Data\CartInterface $quote);
+
+    /**
+     * @return int
+     */
+    public function getLastIncrementId();
+
+    /**
+     * @return $this
+     */
+    public function reGenerateIncrementId();
 }

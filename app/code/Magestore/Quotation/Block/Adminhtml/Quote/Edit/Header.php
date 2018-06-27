@@ -16,8 +16,8 @@ class Header extends \Magestore\Quotation\Block\Adminhtml\Quote\Edit\AbstractEdi
      */
     protected function _toHtml()
     {
-        if ($this->getQuote()->getId()) {
-            return __('Quote #%1', $this->getQuote()->getId());
+        if ($this->getQuote()->getRequestIncrementId()) {
+            return __('Quote #%1', $this->getQuote()->getRequestIncrementId());
         }
         return __('New Quote');
     }

@@ -66,7 +66,7 @@ class Address extends \Magento\Backend\Block\Widget\Form\Container
     public function getHeaderText()
     {
         $address = $this->_coreRegistry->registry('current_quote_address');
-        $quoteId = $address->getQuote()->getEntityId();
+        $quoteId = $address->getQuote()->getRequestIncrementId();
         if ($address->getAddressType() == 'shipping') {
             $type = __('Shipping');
         } else {

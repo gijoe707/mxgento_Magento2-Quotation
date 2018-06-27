@@ -64,7 +64,7 @@ class View extends \Magento\Framework\View\Element\Template
      */
     protected function _prepareLayout()
     {
-        $this->pageConfig->getTitle()->set(__('Quote # %1', $this->getQuote()->getEntityId()));
+        $this->pageConfig->getTitle()->set(__('Quote # %1', $this->getQuote()->getRequestIncrementId()));
     }
 
     /**

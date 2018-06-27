@@ -9,11 +9,11 @@
 ?>
 <?php /** @var $block \Magestore\Quotation\Block\Cart\Success */ ?>
 <div class="checkout-success">
-    <?php if ($block->getQuoteId()):?>
+    <?php if ($block->getRequestIncrementId()):?>
         <?php if ($block->getCanViewQuote()) :?>
-            <p><?= __('Your quote request is: %1.', sprintf('<a href="%s" class="order-number"><strong>%s</strong></a>', $block->escapeHtml($block->getViewQuoteUrl()), $block->escapeHtml($block->getQuoteId()))) ?></p>
+            <p><?= __('Your quote request is: %1.', sprintf('<a href="%s" class="order-number"><strong>%s</strong></a>', $block->escapeHtml($block->getViewQuoteUrl()), $block->escapeHtml($block->getRequestIncrementId()))) ?></p>
         <?php  else :?>
-            <p><?= __('Your quote request # is: <span>%1</span>.', $block->escapeHtml($block->getQuoteId())) ?></p>
+            <p><?= __('Your quote request # is: <span>%1</span>.', $block->escapeHtml($block->getRequestIncrementId())) ?></p>
         <?php endif;?>
             <p><?= /* @escapeNotVerified */ __('We\'ll email you a quotation with details info.') ?></p>
     <?php endif;?>
