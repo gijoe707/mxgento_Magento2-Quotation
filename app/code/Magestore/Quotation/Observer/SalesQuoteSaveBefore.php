@@ -5,18 +5,18 @@ use Magento\Framework\Event\ObserverInterface;
 class SalesQuoteSaveBefore implements ObserverInterface
 {
     /**
-     * @var \Magestore\Quotation\Api\QuotationManagementInterface
+     * @var \Magestore\Quotation\Api\IncrementManagementInterface
      */
-    protected $quotationManagement;
+    protected $incrementManagement;
 
     /**
      * SalesQuoteSaveBefore constructor.
-     * @param \Magestore\Quotation\Api\QuotationManagementInterface $quotationManagement
+     * @param \Magestore\Quotation\Api\IncrementManagementInterface $incrementManagement
      */
     public function __construct(
-        \Magestore\Quotation\Api\QuotationManagementInterface $quotationManagement
+        \Magestore\Quotation\Api\IncrementManagementInterface $incrementManagement
     ) {
-        $this->quotationManagement = $quotationManagement;
+        $this->incrementManagement = $incrementManagement;
     }
 
     /**
@@ -31,7 +31,7 @@ class SalesQuoteSaveBefore implements ObserverInterface
         if (!$quote) {
             return;
         }
-        $this->quotationManagement->setupIncrementId($quote);
+        $this->incrementManagement->setupIncrementId($quote);
         return $this;
     }
 }
