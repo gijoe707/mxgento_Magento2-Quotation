@@ -562,7 +562,7 @@ class QuotationManagement implements \Magestore\Quotation\Api\QuotationManagemen
     public function moveToAdminCart(\Magento\Quote\Api\Data\CartInterface $quote){
         $this->adminSessionQuote->clearStorage();
         $this->adminSessionQuote->setStoreId($quote->getStoreId());
-        $this->adminSessionQuote->setCustomerId($quote->getCustomerId());
+        $this->adminSessionQuote->setCustomerId($quote->getCustomerId()?$quote->getCustomerId():false);
         $this->adminSessionQuote->setCurrencyId($quote->getQuoteCurrencyCode());
         $adminCart = $this->adminSessionQuote->getQuote();
         $this->updateStatus($adminCart, QuoteStatus::STATUS_NONE, QuoteStatus::STATUS_NONE);
