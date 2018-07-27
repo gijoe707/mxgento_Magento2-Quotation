@@ -65,17 +65,29 @@ class QuotationManagement implements \Magestore\Quotation\Api\QuotationManagemen
     protected $quoteCommentHistoryRepository;
 
     /**
+     * @var \Magento\Backend\Model\Session\Quote
+     */
+    protected $adminSessionQuote;
+
+    /**
+     * @var \Magento\Sales\Model\AdminOrder\Create
+     */
+    protected $adminOrderCreate;
+
+    /**
      * QuotationManagement constructor.
      * @param \Magento\Framework\Event\ManagerInterface $eventManager
      * @param \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
      * @param \Magento\Quote\Model\ResourceModel\Quote\CollectionFactory $collectionFactory
      * @param \Magestore\Quotation\Model\Quote\Email\Sender $quoteSender
-     * @param \Magestore\Quotation\Model\Quote\Comment\Email\Sender
+     * @param \Magestore\Quotation\Model\Quote\Comment\Email\Sender $quoteCommentSender
      * @param \Magestore\Quotation\Helper\Data $helper
      * @param \Magento\Checkout\Model\Cart $checkoutCart
      * @param \Psr\Log\LoggerInterface $logger
      * @param \Magento\Checkout\Model\Type\Onepage $onepageCheckout
      * @param \Magestore\Quotation\Api\QuoteCommentHistoryRepositoryInterface $quoteCommentHistoryRepository
+     * @param \Magento\Backend\Model\Session\Quote $adminSessionQuote
+     * @param \Magento\Sales\Model\AdminOrder\Create $adminOrderCreate
      */
     public function __construct(
         \Magento\Framework\Event\ManagerInterface $eventManager,
@@ -87,7 +99,9 @@ class QuotationManagement implements \Magestore\Quotation\Api\QuotationManagemen
         \Magento\Checkout\Model\Cart $checkoutCart,
         \Psr\Log\LoggerInterface $logger,
         \Magento\Checkout\Model\Type\Onepage $onepageCheckout,
-        \Magestore\Quotation\Api\QuoteCommentHistoryRepositoryInterface $quoteCommentHistoryRepository
+        \Magestore\Quotation\Api\QuoteCommentHistoryRepositoryInterface $quoteCommentHistoryRepository,
+        \Magento\Backend\Model\Session\Quote $adminSessionQuote,
+        \Magento\Sales\Model\AdminOrder\Create $adminOrderCreate
     ) {
         $this->eventManager = $eventManager;
         $this->quoteRepository = $quoteRepository;
@@ -99,6 +113,8 @@ class QuotationManagement implements \Magestore\Quotation\Api\QuotationManagemen
         $this->logger = $logger;
         $this->onepageCheckout = $onepageCheckout;
         $this->quoteCommentHistoryRepository = $quoteCommentHistoryRepository;
+        $this->adminSessionQuote = $adminSessionQuote;
+        $this->adminOrderCreate = $adminOrderCreate;
     }
 
     /**
@@ -541,6 +557,59 @@ class QuotationManagement implements \Magestore\Quotation\Api\QuotationManagemen
 
     /**
      * @param \Magento\Quote\Api\Data\CartInterface $quote
+     * @return $this
+     */
+    public function moveToAdminCart(\Magento\Quote\Api\Data\CartInterface $quote){
+        $this->adminSessionQuote->clearStorage();
+        $this->adminSessionQuote->setStoreId($quote->getStoreId());
+        $this->adminSessionQuote->setCustomerId($quote->getCustomerId());
+        $this->adminSessionQuote->setCurrencyId($quote->getQuoteCurrencyCode());
+        $adminCart = $this->adminSessionQuote->getQuote();
+        $this->updateStatus($adminCart, QuoteStatus::STATUS_NONE, QuoteStatus::STATUS_NONE);
+        $adminCart->setIsMultiShipping(false);
+        $adminCart->setData("quotation_request_id", $quote->getId());
+        $adminCart->merge($quote);
+
+        if($quote->getCustomer()){
+            $adminCart->assignCustomer($quote->getCustomer());
+        }
+
+        $billingAddress = $quote->getBillingAddress();
+        if($billingAddress){
+            $newBillingAddress = clone $billingAddress;
+            $newBillingAddress->unsetData("customer_address_id");
+            $newBillingAddress->unsetData("address_id");
+            $newBillingAddress->unsetData("quote_id");
+            $newBillingAddress->unsetData("created_at");
+            $newBillingAddress->unsetData("updated_at");
+            $adminCart->getBillingAddress()->addData($newBillingAddress->getData());
+        }
+
+        $shippingAddress = $quote->getShippingAddress();
+        if($shippingAddress){
+            $newShippingAddress = clone $shippingAddress;
+            $newShippingAddress->unsetData("customer_address_id");
+            $newShippingAddress->unsetData("address_id");
+            $newShippingAddress->unsetData("quote_id");
+            $newShippingAddress->unsetData("created_at");
+            $newShippingAddress->unsetData("updated_at");
+            $adminCart->getShippingAddress()->addData($newShippingAddress->getData());
+            $adminCart->getShippingAddress()
+                ->setCollectShippingRates(true)
+                ->collectShippingRates();
+        }
+        $this->adminOrderCreate->setQuote($adminCart);
+
+
+        if($shippingAddress && $shippingAddress->getShippingMethod()){
+            $this->adminOrderCreate->setShippingMethod($shippingAddress->getShippingMethod());
+        }
+        $this->adminOrderCreate->saveQuote();
+        return $this;
+    }
+
+    /**
+     * @param \Magento\Quote\Api\Data\CartInterface $quote
      * @return array
      */
     public function canView(\Magento\Quote\Api\Data\CartInterface $quote){
@@ -569,54 +638,72 @@ class QuotationManagement implements \Magestore\Quotation\Api\QuotationManagemen
 
     /**
      * @param \Magento\Quote\Api\Data\CartInterface $quote
+     * @param bool $isAdmin
      * @return bool
      * @throws \Magento\Framework\Exception\ValidatorException
      */
-    public function canOrder(\Magento\Quote\Api\Data\CartInterface $quote){
+    public function canOrder(\Magento\Quote\Api\Data\CartInterface $quote, $isAdmin = false){
         $canOrder = [
             'error' => false,
             'error_code' => '',
             'error_message' => ''
         ];
-        $status = $quote->getRequestStatus();
-        switch ($status){
-            case QuoteStatus::STATUS_PROCESSED:
-                $isExpired = $this->isExpired($quote);
-                if($isExpired){
-                    $canOrder['error'] = true;
-                    $canOrder['error_code'] = self::ERROR_REQUEST_EXPIRED;
-                    $canOrder['error_message'] = __("This quotation has been expired, please submit a new quote request");
-                }
-                break;
-
-            case QuoteStatus::STATUS_EXPIRED:
-                $canOrder['error'] = true;
-                $canOrder['error_code'] = self::ERROR_REQUEST_EXPIRED;
-                $canOrder['error_message'] = __("This quotation has been expired, please submit a new quote request");
-                break;
-
-            case QuoteStatus::STATUS_DECLINED:
-                $canOrder['error'] = true;
-                $canOrder['error_code'] = self::ERROR_REQUEST_HAS_BEEN_DECLINED;
-                $canOrder['error_message'] = __("This quotation has been declined, please submit a new quote request");
-                break;
-
-            case QuoteStatus::STATUS_ORDERED:
+        if($isAdmin){
+            $orderId = $quote->getRequestOrderedId();
+            if($orderId){
                 $canOrder['error'] = true;
                 $canOrder['error_code'] = self::ERROR_REQUEST_HAS_BEEN_ORDERED;
                 $canOrder['error_message'] = __("This quotation has been ordered, please submit a new quote request");
-                break;
+            }
+        }else{
+            $status = $quote->getRequestStatus();
+            switch ($status){
+                case QuoteStatus::STATUS_PROCESSED:
+                    $isExpired = $this->isExpired($quote);
+                    if($isExpired){
+                        $canOrder['error'] = true;
+                        $canOrder['error_code'] = self::ERROR_REQUEST_EXPIRED;
+                        $canOrder['error_message'] = __("This quotation has been expired, please submit a new quote request");
+                    }
+                    break;
 
-            default:
-                $canOrder['error'] = true;
-                $canOrder['error_code'] = self::ERROR_REQUEST_IS_NOT_PROCESSED;
-                $canOrder['error_message'] = __("This quote request has not been processed yet, please contact the store manager");
-                break;
+                case QuoteStatus::STATUS_EXPIRED:
+                    $canOrder['error'] = true;
+                    $canOrder['error_code'] = self::ERROR_REQUEST_EXPIRED;
+                    $canOrder['error_message'] = __("This quotation has been expired, please submit a new quote request");
+                    break;
+
+                case QuoteStatus::STATUS_DECLINED:
+                    $canOrder['error'] = true;
+                    $canOrder['error_code'] = self::ERROR_REQUEST_HAS_BEEN_DECLINED;
+                    $canOrder['error_message'] = __("This quotation has been declined, please submit a new quote request");
+                    break;
+
+                case QuoteStatus::STATUS_ORDERED:
+                    $canOrder['error'] = true;
+                    $canOrder['error_code'] = self::ERROR_REQUEST_HAS_BEEN_ORDERED;
+                    $canOrder['error_message'] = __("This quotation has been ordered, please submit a new quote request");
+                    break;
+
+                default:
+                    $canOrder['error'] = true;
+                    $canOrder['error_code'] = self::ERROR_REQUEST_IS_NOT_PROCESSED;
+                    $canOrder['error_message'] = __("This quote request has not been processed yet, please contact the store manager");
+                    break;
+            }
         }
 
         if($canOrder['error'] == true){
             throw new \Magento\Framework\Exception\ValidatorException($canOrder['error_message'], null, $canOrder['error_code']);
         }
+        return true;
+    }
+
+    /**
+     * @param \Magento\Quote\Api\Data\CartInterface $quote
+     * @return bool
+     */
+    public function canPrint(\Magento\Quote\Api\Data\CartInterface $quote){
         return true;
     }
 
@@ -711,5 +798,13 @@ class QuotationManagement implements \Magestore\Quotation\Api\QuotationManagemen
             $this->quoteRepository->save($quote);
         }
         return $quote;
+    }
+
+    /**
+     * @param \Magento\Quote\Api\Data\CartInterface $quote
+     * @return mixed
+     */
+    public function getEmailHtml(\Magento\Quote\Api\Data\CartInterface $quote){
+        return $this->quoteSender->getEmailHtml($quote);
     }
 }

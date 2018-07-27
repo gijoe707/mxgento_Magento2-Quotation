@@ -63,7 +63,7 @@ class Sender extends \Magestore\Quotation\Model\Quote\Email\AbstractSender
      * @param \Magento\Quote\Api\Data\CartInterface $quote
      * @return bool
      */
-    function send(\Magento\Quote\Api\Data\CartInterface $quote)
+    public function send(\Magento\Quote\Api\Data\CartInterface $quote)
     {
         $this->identityContainer->setStore($quote->getStore());
         if (!$this->identityContainer->isEnabled()) {
@@ -88,6 +88,18 @@ class Sender extends \Magestore\Quotation\Model\Quote\Email\AbstractSender
         }
 
         return true;
+    }
+
+    /**
+     * @param \Magento\Quote\Api\Data\CartInterface $quote
+     * @return mixed
+     */
+    public function getEmailHtml(\Magento\Quote\Api\Data\CartInterface $quote)
+    {
+        $this->identityContainer->setStore($quote->getStore());
+        $this->prepareTemplate($quote);
+        $sender = $this->getSender();
+        return $sender->getEmailHtml();
     }
 
     /**
@@ -179,7 +191,7 @@ class Sender extends \Magestore\Quotation\Model\Quote\Email\AbstractSender
      * @return string
      */
     public function getQuotePdfFileName(\Magento\Quote\Api\Data\CartInterface  $quote){
-        return __("Quotation_#%1.pdf", $quote->getId())->__toString();
+        return __("Quotation_#%1.pdf", $quote->getRequestIncrementId())->__toString();
     }
 
     /**

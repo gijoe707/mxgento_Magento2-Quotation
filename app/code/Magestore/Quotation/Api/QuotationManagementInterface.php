@@ -157,16 +157,29 @@ interface QuotationManagementInterface
 
     /**
      * @param \Magento\Quote\Api\Data\CartInterface $quote
+     * @return $this
+     */
+    public function moveToAdminCart(\Magento\Quote\Api\Data\CartInterface $quote);
+
+    /**
+     * @param \Magento\Quote\Api\Data\CartInterface $quote
      * @return array
      */
     public function canView(\Magento\Quote\Api\Data\CartInterface $quote);
 
     /**
      * @param \Magento\Quote\Api\Data\CartInterface $quote
+     * @param bool $isAdmin
      * @return bool
      * @throws \Magento\Framework\Exception\ValidatorException
      */
-    public function canOrder(\Magento\Quote\Api\Data\CartInterface $quote);
+    public function canOrder(\Magento\Quote\Api\Data\CartInterface $quote, $isAdmin);
+
+    /**
+     * @param \Magento\Quote\Api\Data\CartInterface $quote
+     * @return bool
+     */
+    public function canPrint(\Magento\Quote\Api\Data\CartInterface $quote);
 
     /**
      * @param \Magento\Quote\Api\Data\CartInterface $quote

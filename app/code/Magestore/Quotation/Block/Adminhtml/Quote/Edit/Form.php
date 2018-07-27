@@ -175,6 +175,8 @@ class Form extends \Magestore\Quotation\Block\Adminhtml\Quote\Edit\AbstractEdit
         $data['quote_id'] = $this->getQuote()->getId();
         $data['can_edit'] = $this->canEdit();
         $data['quote_listing_url'] = $this->getUrl('quotation/quote/');
+        $data['quote_print_url'] = $this->getUrl('quotation/quote/printPdf', ['quote_id' => $data['quote_id']]);
+        $data['order_create_url'] = $this->getUrl('sales/order_create/index');
 
         if ($this->getCustomerId()) {
             $data['customer_id'] = $this->getCustomerId();

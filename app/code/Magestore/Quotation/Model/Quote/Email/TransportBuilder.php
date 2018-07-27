@@ -94,4 +94,12 @@ class TransportBuilder extends \Magento\Framework\Mail\Template\TransportBuilder
         }
         return $this;
     }
+
+    /**
+     * @return string
+     */
+    public function getContentHtml(){
+        $template = $this->getTemplate();
+        return $template->processTemplate();
+    }
 }

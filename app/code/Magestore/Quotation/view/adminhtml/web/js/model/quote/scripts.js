@@ -53,7 +53,9 @@ define([
             this.productPriceBase = {};
             this.collectElementsValue = true;
             this.summarizePrice = true;
+            this.quote_print_url = data.quote_print_url ? data.quote_print_url : "";
             this.quote_listing_url = data.quote_listing_url ? data.quote_listing_url : "";
+            this.order_create_url = data.order_create_url ? data.order_create_url : "";
             this.can_edit = data.can_edit ? data.can_edit : false;
             jQuery.async('#quote-items', (function(){
                 this.dataArea = new QuoteFormArea('data', $(this.getAreaId('data')), this);
@@ -1141,6 +1143,24 @@ define([
             var params = {clear_session: true};
             self.loadArea([], true, params).done(function(){
                 window.location.href = self.quote_listing_url;
+            });
+        },
+        print: function(){
+            var self = this;
+            // var params = {};
+            // self.loadArea([], true, params).done(function(){
+                window.location.href = self.quote_print_url;
+            // });
+        },
+        convertToOrder: function(){
+            var self = this;
+            var params = {quote_request_action: 'convert_to_order'};
+            self.loadArea([], true, params).done(function(response){
+                if(response){
+                    if(!response.message){
+                        window.location.href = self.order_create_url;
+                    }
+                }
             });
         },
         submitRequest: function(){

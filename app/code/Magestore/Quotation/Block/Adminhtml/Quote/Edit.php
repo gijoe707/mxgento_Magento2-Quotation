@@ -87,6 +87,23 @@ class Edit extends \Magento\Backend\Block\Widget\Form\Container
                 ]);
             }
 
+            $canPrint = $this->quotationManagement->canPrint($quote);
+            if($canPrint){
+                $this->buttonList->add('print', [
+                    'label' => __("Print"),
+                    'class' => 'print',
+                    'onclick' => "quote.print()"
+                ]);
+            }
+
+            if($quote->getRequestStatus() != QuoteStatus::STATUS_ORDERED){
+                $this->buttonList->add('convert_to_order', [
+                    'label' => __("Convert To Order"),
+                    'class' => 'convert_to_order',
+                    'onclick' => "quote.convertToOrder()"
+                ]);
+            }
+
             $canDecline = $this->quotationManagement->canDecline($quote);
             if($canDecline){
                 $confirm = __('Are you sure to decline this quote request?');

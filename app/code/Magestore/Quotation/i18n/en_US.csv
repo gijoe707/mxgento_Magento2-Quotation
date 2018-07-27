@@ -158,4 +158,6 @@
 "Send to customer when admin add new comment on quote","Send to customer when admin add new comment on quote"
 "Expire on","Expire on"
 "Model","Model"
-"",""
+"Print","Print"
+"Convert To Order","Convert To Order"
+"The DOMPDF library is mising, please install by the following command: composer require dompdf/dompdf","The DOMPDF library is mising, please install by the following command: composer require dompdf/dompdf"

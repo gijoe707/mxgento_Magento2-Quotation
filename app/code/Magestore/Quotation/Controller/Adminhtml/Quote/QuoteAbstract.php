@@ -282,6 +282,14 @@ abstract class QuoteAbstract extends \Magestore\Quotation\Controller\Adminhtml\A
             if ($requestAction == 'decline') {
                 $this->_getQuotationManagement()->decline($quote);
             }
+
+            if ($requestAction == 'convert_to_order') {
+                $canOrder = $this->_getQuotationManagement()->canOrder($quote, true);
+                if($canOrder){
+                    $this->_getQuotationManagement()->moveToAdminCart($quote);
+                }
+            }
+
             $expirationDate = $this->getRequest()->getPost('expiration_date');
             if(isset($expirationDate)){
                 $this->_getQuotationManagement()->setExpirationDate($quote, $expirationDate);
