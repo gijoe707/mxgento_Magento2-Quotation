@@ -130,7 +130,7 @@ class Edit extends \Magento\Backend\Block\Widget\Form\Container
                 'onclick' => "quote.cancel()"
             ]);
             $this->buttonList->add('submit_quote_top_button', [
-                'label' => __("Submit"),
+                'label' => __("Save"),
                 'class' => 'submit primary',
                 'onclick' => "quote.submitRequest()"
             ]);
